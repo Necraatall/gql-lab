@@ -18,6 +18,7 @@ const typeDefs = `
 	type Query {
 		GetAuthors: [Author!]!
 		GetBooks(name: String): [Book!]!
+		GetBook(name: String): [Book!]!
 	}
 
 
@@ -59,7 +60,7 @@ const authors = [
 const resolvers = {
 	Query: {
 		GetAuthors: () => authors,
-		GetBooks: (parent, args, contextValue, info) => {
+		GetBooks: () => {
 			// let searchedBooks = []
 			//for (let author of authors) {
 			//	console.log(author.titles)
@@ -67,6 +68,12 @@ const resolvers = {
 			//	// searchedBooks = author.titles bere posledni iteraci loop
 			//	searchedBooks = searchedBooks.concat(books)
 			//}
+
+			let books = authors.map(author => author.titles).flat().sort(compareBooks)
+
+			return books
+		},
+		GetBook: (parent, args, contextValue, info) => {
 			const nameFilter = args.name
 			let books = authors.map(author => author.titles).flat().sort(compareBooks)
 			if (nameFilter !== undefined || nameFilter !== null) {
