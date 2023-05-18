@@ -19,6 +19,7 @@ const typeDefs = `
 		GetAuthors: [Author!]!
 		GetBooks(name: String): [Book!]!
 		GetBook(name: String): [Book!]!
+		GetAuthor(name: String): [Book!]!
 	}
 
 
@@ -80,11 +81,29 @@ const resolvers = {
 				books = books.filter(book => book.name === nameFilter)
 			}
 			return books
+		},
+		GetAuthor: (parent, args, contextValue, info) => {
+			const authorFilter = args.author
+			let author = authors.map(author => author).flat().sort(compareAuthors)
+			if (authorFilter !== undefined || authorFilter !== null) {
+				author = author.filter(author => author === authorFilter)
+			}
+			return author
 		}
 	},
 };
 
 function compareBooks(a: any, b: any) {
+	if (a.name < b.name) {
+		return -1
+	}
+	else if (b.name < a.name) {
+		return 1
+	}
+	return 0
+}
+
+function compareAuthors(a: any, b: any) {
 	if (a.name < b.name) {
 		return -1
 	}
