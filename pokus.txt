@@ -1,50 +1,31 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable semi */
 import { ApolloServer } from '@apollo/server';
-
 import { startStandaloneServer } from '@apollo/server/standalone';
-
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
-
 const typeDefs = `
 	type Book {
 		name: String
 		published: String
 	}
 
-	type Author_Inner {
-		name:String,
-		pseudonyms: [String!]!,
-		borned: String,
-		died: String
-	}
-
 	type Author {
-		author: Author_Inner
+		author: String
 		titles: [Book]
 	}
 
 	type Query {
 		GetAuthors: [Author!]!
-		GetAuthor(name: String): Author_Inner!
 		GetBooks(name: String): [Book!]!
-		GetBook(name: String): [Book!]!
 	}
+
 
 `;
 // pole objektu s knizky a ten ma predpis jako ISBN
 const authors = [
 	{
-		author:
-		{
-			name: 'Brian W. Aldis',
-			pseudonyms: ['Brian W. Aldis'],
-			borned: '15.03.1956',
-			died: '16.05.1986',
-		},
+		author: 'Brian W. Aldis',
 		titles: [
 			{
 				name: 'Nonstop',
@@ -58,13 +39,7 @@ const authors = [
 		],
 	},
 	{
-		author:
-		{
-			name: 'J. R. R. Tolkien',
-			pseudonyms: ['Tolkien'],
-			borned: '15.03.1916',
-			died: '16.05.1986',
-		},
+		author: 'Tolkien',
 		titles: [
 			{
 				name: 'Pan prstenu',
@@ -84,33 +59,25 @@ const authors = [
 const resolvers = {
 	Query: {
 		GetAuthors: () => authors,
-		GetBooks: () => {
-			const books = authors.map(author => author.titles).flat().sort(compareStrings)
-			return books
-		},
-		GetBook: (parent, args, contextValue, info) => {
+		GetBooks: (parent, args, contextValue, info) => {
+			// let searchedBooks = []
+			//for (let author of authors) {
+			//	console.log(author.titles)
+			//	const books = author.titles
+			//	// searchedBooks = author.titles bere posledni iteraci loop
+			//	searchedBooks = searchedBooks.concat(books)
+			//}
 			const nameFilter = args.name
-			let books = authors.map(author => author.titles).flat().sort(compareStrings)
+			let books = authors.map(author => author.titles).flat().sort(compareBooks)
 			if (nameFilter !== undefined || nameFilter !== null) {
 				books = books.filter(book => book.name === nameFilter)
 			}
 			return books
-		},
-
-		GetAuthor: (parent, args, contextValue, info) => {
-			const authorFilter = args.name
-			let filteredAuthor = null
-			if (authorFilter) {
-				filteredAuthor = authors.find(author => author.author.name === authorFilter)?.author || null
-			}
-			return filteredAuthor
 		}
-
 	},
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function compareStrings(a: any, b: any) {
+function compareBooks(a: any, b: any) {
 	if (a.name < b.name) {
 		return -1
 	}
@@ -119,7 +86,6 @@ function compareStrings(a: any, b: any) {
 	}
 	return 0
 }
-
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
