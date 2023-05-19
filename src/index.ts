@@ -13,6 +13,7 @@ const typeDefs = `
 	type Book {
 		name: String
 		published: String
+		cowriters: [String]
 	}
 
 	type Author_Inner {
@@ -49,10 +50,12 @@ const authors = [
 			{
 				name: 'Nonstop',
 				published: '16.1.1965',
+				cowriters: [''],
 			},
 			{
 				name: 'Helikonie I',
 				published: '16.1.1960',
+				cowriters: [''],
 			},
 
 		],
@@ -69,10 +72,12 @@ const authors = [
 			{
 				name: 'Pan prstenu',
 				published: '16.2.1930',
+				cowriters: [''],
 			},
 			{
 				name: 'Silmarilion',
 				published: '16.11.1945',
+				cowriters: [''],
 			},
 
 		],
