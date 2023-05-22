@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable semi */
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
@@ -8,19 +6,18 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 // that together define the "shape" of queries that are executed against
 // your data.
 const typeDefs = `
+	union SearchResult = Book | Author
+
 	type Book {
-		name: String
-		published: String
+	title: String!
 	}
 
 	type Author {
-		author: String
-		titles: [Book]
+	name: String!
 	}
 
 	type Query {
-		GetAuthors: [Author!]!
-		GetBooks(name: String): [Book!]!
+	search(contains: String): [SearchResult!]
 	}
 
 
@@ -28,56 +25,33 @@ const typeDefs = `
 // pole objektu s knizky a ten ma predpis jako ISBN
 const authors = [
 	{
-		author: 'Brian W. Aldis',
-		titles: [
-			{
-				name: 'Nonstop',
-				published: '16.1.1965',
-			},
-			{
-				name: 'Helikonie I',
-				published: '16.1.1960',
-			},
+		name: 'Brian W. Aldis',
+		titles: ['Nonstop', 'Helikonie I',]
 
-		],
 	},
-	{
-		author: 'Tolkien',
-		titles: [
-			{
-				name: 'Pan prstenu',
-				published: '16.2.1930',
-			},
-			{
-				name: 'Silmarilion',
-				published: '16.11.1945',
-			},
 
-		],
-	},
 ];
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
 const resolvers = {
-	Query: {
-		GetAuthors: () => authors,
-		GetBooks: (parent, args, contextValue, info) => {
-			// let searchedBooks = []
-			//for (let author of authors) {
-			//	console.log(author.titles)
-			//	const books = author.titles
-			//	// searchedBooks = author.titles bere posledni iteraci loop
-			//	searchedBooks = searchedBooks.concat(books)
-			//}
-			const nameFilter = args.name
-			let books = authors.map(author => author.titles).flat().sort(compareBooks)
-			if (nameFilter !== undefined || nameFilter !== null) {
-				books = books.filter(book => book.name === nameFilter)
+	SearchResult: {
+		__resolveType(obj, contextValue, info) {
+			// Only Author has a name field
+			if (obj.name) {
+				return 'Author';
 			}
-			return books
-		}
+			// Only Book has a title field
+			if (obj.title) {
+				return 'Book';
+			}
+			return null; // GraphQLError is thrown
+		},
 	},
+	Query: {
+		search: () => authors,
+	},
+
 };
 
 function compareBooks(a: any, b: any) {
