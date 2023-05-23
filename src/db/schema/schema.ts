@@ -13,3 +13,9 @@ export const cities = sqliteTable('cities', {
     name: text('name'),
     countryId: integer('country_id').references(() => countries.id),
 })
+
+export const book = sqliteTable('author', {
+    id: integer('id').primaryKey(),
+    name: text('name'),
+    published: text('published'),
+})

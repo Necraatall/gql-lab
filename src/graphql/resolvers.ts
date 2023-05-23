@@ -4,6 +4,7 @@ import { Character } from './Character'
 const resolvers = {
     Query: {
         ...User.resolvers.queries,
+        ...Character.resolvers.queries,
     },
     Mutation: {
         ...User.resolvers.mutations,
