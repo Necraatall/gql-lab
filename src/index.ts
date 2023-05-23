@@ -4,6 +4,8 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 
+
+
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
@@ -18,9 +20,11 @@ const typeDefs = `
 		titles: [Book]
 	}
 
+	union SearchResult = Book | Author
+
 	type Query {
 		GetAuthors: [Author!]!
-		GetBooks(name: String): [Book!]!
+		GetBooks(name: String): [SearchResult!]!
 	}
 
 
@@ -59,23 +63,19 @@ const authors = [
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
+
 const resolvers = {
 	Query: {
 		GetAuthors: () => authors,
 		GetBooks: (parent, args, contextValue, info) => {
-			// let searchedBooks = []
-			//for (let author of authors) {
-			//	console.log(author.titles)
-			//	const books = author.titles
-			//	// searchedBooks = author.titles bere posledni iteraci loop
-			//	searchedBooks = searchedBooks.concat(books)
-			//}
 			const nameFilter = args.name
 			let books = authors.map(author => author.titles).flat().sort(compareBooks)
 			if (nameFilter !== undefined || nameFilter !== null) {
 				books = books.filter(book => book.name === nameFilter)
 			}
-			return books
+			// Wrap each book in a SearchResult object
+			const searchResults = books.map(book => ({ __typename: 'Book', ...book }))
+			return searchResults
 		}
 	},
 };
