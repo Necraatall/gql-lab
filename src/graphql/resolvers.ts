@@ -1,5 +1,5 @@
 import { User } from './User'
-import { User } from './Character'
+import { Character } from './Character'
 
 const resolvers = {
     Query: {
